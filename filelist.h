@@ -27,70 +27,11 @@
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-
 #include <gtk/gtk.h>
-#include <string.h>
+#include <glib.h>
+#include <glib/gprintf.h>
 #include "model.h"
-#include "filelist.h"
 
-static gboolean 
-on_delete_event (GtkWidget *widget, GdkEvent*event, gpointer user_data)
-{
-	gtk_main_quit();
-	return GDK_EVENT_PROPAGATE;
-}
+#define IMG_REGEXP_EXPRESSION ".[Jj][Pp][Gg]$|.[Jj][Pp][Ee][Gg]$|.[Gg][Ii][Ff]$"
 
-gint main (gint argc, gchar **argv)
-{
-	// Parent window
-	GtkWidget *window;
-
-	// The model to compose all the views
-	GtkListStore *model;
-	
-	// The path 
-	gchar *now_path;
-
-	// Initialize GTK
-	gtk_init(&argc, &argv);
-	
-	// Specify the path
-	if(argv[1])
-		now_path = argv[1];
-	else
-		now_path = ".";
-
-	// Create the model
-	/* Create and fill the model */
-	model = gtk_list_store_new (N_COLUMNS,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING,
-				    G_TYPE_BOOLEAN,
-				    G_TYPE_BOOLEAN,
-				    G_TYPE_BOOLEAN);
-	
-	// Compose the model with an image list
-	compose_imgfile_list(model, now_path);
-
-	// Two type of windows:
-	// - Top level
-	// - Pop up
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title (GTK_WINDOW (window), "A very simple image viewer");
-	gtk_window_set_default_size (GTK_WINDOW (window), 1024, 768);
-
-	// A Tree view model to show now path dirs and image files
-
-	// The Image View
-
-	// Set the connect
-	g_signal_connect (window, "delete-event",
-			  G_CALLBACK (on_delete_event), NULL);
-	
-	// Show all
-	gtk_widget_show(window);
-	
-	// Initialize event loop
-	gtk_main ();
-	return 0;
-}
+void compose_imgfile_list(GtkListStore *model, gchar *dir_path);

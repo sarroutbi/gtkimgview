@@ -32,6 +32,7 @@
 #include <string.h>
 #include "model.h"
 #include "filelist.h"
+#include "treeview.h"
 
 static gboolean 
 on_delete_event (GtkWidget *widget, GdkEvent*event, gpointer user_data)
@@ -48,12 +49,28 @@ gint main (gint argc, gchar **argv)
 	// The model to compose all the views
 	GtkListStore *model;
 	
+	// The tree view
+	GtkWidget *tree_view;
+	
 	// The path 
 	gchar *now_path;
 
+	// Icons
+	GdkPixbuf *folder_pixbuf, *img_pixbuf;
+	GtkIconTheme *icon_theme;
+
 	// Initialize GTK
 	gtk_init(&argc, &argv);
-	
+
+	// Initialize Icons
+	icon_theme = gtk_icon_theme_get_default ();
+	img_pixbuf = gtk_icon_theme_load_icon (icon_theme,
+					       GTK_STOCK_FILE,
+					       24, 0, NULL);
+	folder_pixbuf = gtk_icon_theme_load_icon (icon_theme,
+						  GTK_STOCK_DIRECTORY,
+						  24, 0, NULL);
+
 	// Specify the path
 	if(argv[1])
 		now_path = argv[1];
@@ -65,12 +82,11 @@ gint main (gint argc, gchar **argv)
 	model = gtk_list_store_new (N_COLUMNS,
 				    G_TYPE_STRING,
 				    G_TYPE_STRING,
-				    G_TYPE_BOOLEAN,
-				    G_TYPE_BOOLEAN,
+				    GDK_TYPE_PIXBUF,
 				    G_TYPE_BOOLEAN);
 	
 	// Compose the model with an image list
-	compose_imgfile_list(model, now_path);
+	compose_imgfile_list(model, now_path, folder_pixbuf, img_pixbuf);
 
 	// Two type of windows:
 	// - Top level
@@ -80,7 +96,10 @@ gint main (gint argc, gchar **argv)
 	gtk_window_set_default_size (GTK_WINDOW (window), 1024, 768);
 
 	// A Tree view model to show now path dirs and image files
-
+	tree_view = create_view_with_model (model);
+	
+	gtk_container_add (GTK_CONTAINER (window), tree_view);
+	
 	// The Image View
 
 	// Set the connect
@@ -88,7 +107,7 @@ gint main (gint argc, gchar **argv)
 			  G_CALLBACK (on_delete_event), NULL);
 	
 	// Show all
-	gtk_widget_show(window);
+	gtk_widget_show_all(window);
 	
 	// Initialize event loop
 	gtk_main ();

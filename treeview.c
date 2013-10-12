@@ -28,11 +28,47 @@
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <gtk/gtk.h>
-#include <glib.h>
-#include <glib/gprintf.h>
 #include "model.h"
 
-#define IMG_REGEXP_EXPRESSION ".[Jj][Pp][Gg]$|.[Jj][Pp][Ee][Gg]$|.[Gg][Ii][Ff]$"
+GtkWidget* create_view_with_model(GtkListStore *model) {
 
-void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
-                          GdkPixbuf *file_pixbuf, GdkPixbuf *img_pixbuf);
+	GtkCellRenderer     *renderer;
+	GtkTreeModel        *tree_model;
+	GtkWidget           *view;
+
+	if(!model) {
+		return NULL;
+	}
+	
+	tree_model = GTK_TREE_MODEL(model);
+
+	view = gtk_tree_view_new ();
+
+	/* --- Column #1: ICON TO SHOW DIR, IMG--- */	
+	renderer = gtk_cell_renderer_pixbuf_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+	                                             -1,
+	                                             "Icon",
+	                                             renderer,
+	                                             "pixbuf", ICON_COLUMN,
+	                                             NULL);
+	
+	/* --- Column #2: PATH --- */	
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+	                                             -1,      
+	                                             "Path",  
+	                                             renderer,
+	                                             "text", FILENAME_COLUMN,
+	                                             NULL);
+	
+	gtk_tree_view_set_model (GTK_TREE_VIEW (view), tree_model);
+	
+	/* The tree view has acquired its own reference to the
+	 *  model, so we can drop ours. That way the model will
+	 *  be freed automatically when the tree view is destroyed */
+	
+	g_object_unref (model);
+	
+	return view;
+}

@@ -36,7 +36,8 @@
 // This method returns a GtkListStore* model 
 // with all the img files considered to be files,
 // as in IMG_REGEXP_EXPRESSION, defined in filelist.h
-void compose_imgfile_list(GtkListStore *model, gchar *dir_path)
+void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
+			  GdkPixbuf *folder_pixbuf, GdkPixbuf *img_pixbuf)
 {
 	GDir        *dir;
 	const gchar *name;
@@ -45,7 +46,7 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path)
 	gtk_list_store_clear (model);
 	dir = g_dir_open (dir_path, 0, NULL);
 
-	if (!dir)
+	if (!dir_path || !folder_pixbuf || !img_pixbuf)
 		return;
 
 	name = g_dir_read_name (dir);
@@ -54,12 +55,12 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path)
 		gboolean is_file = FALSE;
 		gboolean is_img_file = FALSE;
 		gboolean is_dir = FALSE;
-		GRegex*  img_regex;
-		GError*  regex_error;
+		GRegex*  img_regex = NULL;
+		GError*  regex_error = NULL;
 		GMatchInfo* match_info;
 
 		// Create a regex.
-		img_regex = g_regex_new(IMG_REGEXP_EXPRESSION, G_REGEX_OPTIMIZE, 
+		img_regex = g_regex_new(IMG_REGEXP_EXPRESSION, G_REGEX_OPTIMIZE,
 					0, &regex_error);
 
 		/* We ignore hidden files that start with '.' */
@@ -81,15 +82,20 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path)
 
 		is_dir = g_file_test (path, G_FILE_TEST_IS_DIR);
 
-		display_name = g_filename_to_utf8 (name, -1, NULL, NULL, NULL);
+		// Only add to the model, those files that are images
+		// or directories
+		if(is_dir || is_img_file) {
+			display_name = g_filename_to_utf8 (name, -1, NULL, NULL, NULL);
 
-		gtk_list_store_append (model, &iter);
-		gtk_list_store_set (model, &iter,
-				    PATH_COLUMN, path,
-				    FILENAME_COLUMN, display_name,
-				    IS_IMG_FILE_COLUMN, is_img_file,
-				    IS_DIR_COLUMN, is_dir,
-				    -1);
+			gtk_list_store_append (model, &iter);
+			gtk_list_store_set (model, &iter,
+					    PATH_COLUMN, path,
+					    FILENAME_COLUMN, display_name,
+					    ICON_COLUMN, is_dir ? folder_pixbuf : img_pixbuf,
+					    IS_DIR_COLUMN, is_dir,
+					    -1);
+			g_free (display_name);
+		}
 
 		g_printf("Analyzed file:%s, dir:%s file:%s image:%s\n", 
 			 path, is_dir ? "YES" : "NO",
@@ -97,8 +103,6 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path)
 			 is_img_file ? "YES" : "NO");
 
 		g_free (path);
-		g_free (display_name);
-		
 		name = g_dir_read_name (dir);
 	}
 

@@ -30,6 +30,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <string.h>
 #include "model.h"
 #include "filelist.h"
 
@@ -37,24 +38,37 @@
 // with all the img files considered to be files,
 // as in IMG_REGEXP_EXPRESSION, defined in filelist.h
 void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
-			  GdkPixbuf *folder_pixbuf, GdkPixbuf *img_pixbuf)
+			  GdkPixbuf *folder_pixbuf, GdkPixbuf *img_pixbuf,
+			  gchar *file_selected)
 {
 	GDir        *dir;
 	const gchar *name;
 	GtkTreeIter  iter;
+	gboolean     img_selected;
 
 	gtk_list_store_clear (model);
 	dir = g_dir_open (dir_path, 0, NULL);
 
-	if (!dir_path || !folder_pixbuf || !img_pixbuf)
+	if (!dir_path || !folder_pixbuf || !img_pixbuf) {
 		return;
+	}
 
+	g_printf("Updating model, path:%s, selected_file:%s\n",
+		 dir_path, file_selected ? file_selected : "NONE");
+
+	if(file_selected) {
+		img_selected = TRUE;
+	}
+	else {
+		img_selected = FALSE;
+	}
 	name = g_dir_read_name (dir);
 	while (name) {
 		gchar*   path, *display_name;
 		gboolean is_file = FALSE;
 		gboolean is_img_file = FALSE;
 		gboolean is_dir = FALSE;
+		gboolean is_selected = FALSE;
 		GRegex*  img_regex = NULL;
 		GError*  regex_error = NULL;
 		GMatchInfo* match_info;
@@ -85,6 +99,17 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 		// Only add to the model, those files that are images
 		// or directories
 		if(is_dir || is_img_file) {
+			// If no image selected, first one to be selected
+			// else, set selected to the specified on parameter
+			if(!img_selected) {
+				is_selected  = TRUE;
+				img_selected = TRUE;
+			}
+			else if(file_selected && (!strcmp(path, file_selected))) {
+				is_selected  = TRUE;
+				img_selected = TRUE;
+			}
+
 			display_name = g_filename_to_utf8 (name, -1, NULL, NULL, NULL);
 
 			gtk_list_store_append (model, &iter);
@@ -93,15 +118,10 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 					    FILENAME_COLUMN, display_name,
 					    ICON_COLUMN, is_dir ? folder_pixbuf : img_pixbuf,
 					    IS_DIR_COLUMN, is_dir,
+    					    IS_SELECTED_COLUMN, is_selected,
 					    -1);
 			g_free (display_name);
 		}
-
-		g_printf("Analyzed file:%s, dir:%s file:%s image:%s\n", 
-			 path, is_dir ? "YES" : "NO",
-			 is_file ? "YES" : "NO",
-			 is_img_file ? "YES" : "NO");
-
 		g_free (path);
 		name = g_dir_read_name (dir);
 	}

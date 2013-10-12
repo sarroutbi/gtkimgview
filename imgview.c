@@ -28,12 +28,44 @@
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <gtk/gtk.h>
-#include <glib.h>
 #include <glib/gprintf.h>
 #include "model.h"
 
-#define IMG_REGEXP_EXPRESSION ".[Jj][Pp][Gg]$|.[Jj][Pp][Ee][Gg]$|.[Gg][Ii][Ff]$"
+/* Get the GtkWidget as Image Widget with the model */
+GtkWidget* get_image_from_model (GtkListStore *model)
+{
+	gboolean valid;
+	GtkTreeModel *list_store;
+	GtkTreeIter iter;
+	gint row_count = 0;
+        gchar *path;
+        gchar *file;
+	GtkWidget* image_widget;
 
-void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
-                          GdkPixbuf *file_pixbuf, GdkPixbuf *img_pixbuf,
-			  gchar *file_selected);
+	list_store = GTK_TREE_MODEL (model);
+
+	for (valid = gtk_tree_model_get_iter_first (list_store, &iter);
+	     valid; valid = gtk_tree_model_iter_next (list_store, &iter))
+	{
+		gboolean is_selected;
+	
+		/* Make sure you terminate calls to gtk_tree_model_get()
+		 * with a '-1' value
+		 */
+		gtk_tree_model_get (list_store, &iter,
+				    PATH_COLUMN, &path,
+				    FILENAME_COLUMN, &file,
+				    IS_SELECTED_COLUMN, &is_selected,
+				    -1);
+		
+		/* Break when selected image has been found */
+		if(is_selected) {
+			break;
+		}
+		row_count++;
+	}
+	g_printf("CREATING IMAGE WITH PATH:%s\n", path);
+	image_widget = gtk_image_new_from_file(path);
+	g_free (path);
+	return image_widget;
+}

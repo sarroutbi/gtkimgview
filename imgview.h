@@ -28,12 +28,6 @@
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <gtk/gtk.h>
-#include <glib.h>
-#include <glib/gprintf.h>
-#include "model.h"
 
-#define IMG_REGEXP_EXPRESSION ".[Jj][Pp][Gg]$|.[Jj][Pp][Ee][Gg]$|.[Gg][Ii][Ff]$"
-
-void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
-                          GdkPixbuf *file_pixbuf, GdkPixbuf *img_pixbuf,
-			  gchar *file_selected);
+/* Get the GtkImage with the model */
+GtkWidget* get_image_from_model (GtkListStore *model);

@@ -33,6 +33,7 @@
 #include "model.h"
 #include "filelist.h"
 #include "treeview.h"
+#include "imgview.h"
 
 static gboolean 
 on_delete_event (GtkWidget *widget, GdkEvent*event, gpointer user_data)
@@ -41,10 +42,14 @@ on_delete_event (GtkWidget *widget, GdkEvent*event, gpointer user_data)
 	return GDK_EVENT_PROPAGATE;
 }
 
+
 gint main (gint argc, gchar **argv)
 {
 	// Parent window
 	GtkWidget *window;
+
+	// Subwindow to add rest of the childrens
+	GtkWidget *subwindow;
 
 	// The model to compose all the views
 	GtkListStore *model;
@@ -58,6 +63,12 @@ gint main (gint argc, gchar **argv)
 	// Icons
 	GdkPixbuf *folder_pixbuf, *img_pixbuf;
 	GtkIconTheme *icon_theme;
+
+	// Image widget
+	GtkWidget *image;
+
+	// Box for packaging
+	GtkWidget    *vbox, *hbox;
 
 	// Initialize GTK
 	gtk_init(&argc, &argv);
@@ -83,31 +94,57 @@ gint main (gint argc, gchar **argv)
 				    G_TYPE_STRING,
 				    G_TYPE_STRING,
 				    GDK_TYPE_PIXBUF,
+				    G_TYPE_BOOLEAN,
 				    G_TYPE_BOOLEAN);
 	
 	// Compose the model with an image list
-	compose_imgfile_list(model, now_path, folder_pixbuf, img_pixbuf);
+	compose_imgfile_list(model, now_path, folder_pixbuf, img_pixbuf, NULL);
 
 	// Two type of windows:
 	// - Top level
 	// - Pop up
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title (GTK_WINDOW (window), "A very simple image viewer");
-	gtk_window_set_default_size (GTK_WINDOW (window), 1024, 768);
+	gtk_window_set_default_size (GTK_WINDOW (window), 640, 480);
+
+	// Initialize the boxes, 
+	// 0 px space for horizontal children
+	// 12 px space for horizontal children
+	hbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+
+	// The Image View
+	image = get_image_from_model (model);
 
 	// A Tree view model to show now path dirs and image files
-	tree_view = create_view_with_model (model);
+	tree_view = create_view_with_model (model, folder_pixbuf, img_pixbuf, image);
 	
-	gtk_container_add (GTK_CONTAINER (window), tree_view);
-	
-	// The Image View
+	subwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (subwindow),
+					GTK_POLICY_AUTOMATIC,
+					GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (subwindow),
+					     GTK_SHADOW_IN);
+	gtk_container_add (GTK_CONTAINER (subwindow), tree_view);
+	gtk_widget_show (tree_view);
 
+	gtk_box_pack_start (GTK_BOX (hbox), subwindow, TRUE, TRUE, 0);
+	gtk_widget_show (subwindow);
+
+	gtk_box_pack_start (GTK_BOX (hbox), image, TRUE, TRUE, 0);
+	gtk_widget_show (image);
+	
 	// Set the connect
 	g_signal_connect (window, "delete-event",
 			  G_CALLBACK (on_delete_event), NULL);
 	
 	// Show all
-	gtk_widget_show_all(window);
+	gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 0);
+	gtk_widget_show (hbox);
+
+	gtk_container_add(GTK_CONTAINER(window), vbox);
+	gtk_widget_show (vbox);
+	gtk_widget_show (window);
 	
 	// Initialize event loop
 	gtk_main ();

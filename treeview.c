@@ -28,21 +28,73 @@
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <gtk/gtk.h>
+#include <glib/gprintf.h>
 #include "model.h"
+#include "filelist.h"
+#include "imgview.h"
 
-GtkWidget* create_view_with_model(GtkListStore *model) {
+typedef struct
+{
+	GdkPixbuf *folder_pixbuf;
+	GdkPixbuf *img_pixbuf;
+	GtkWidget *img_widget;
+} tree_view_data_t ;
+
+/* Tree View */
+static void
+tree_view_item_activated (GtkTreeView       *tree_view,
+			  GtkTreePath       *path,
+			  GtkTreeViewColumn *column,
+			  gpointer           user_data)
+{
+	GtkTreeModel *tree_model;
+	GtkTreeIter iter;
+	gchar      *item_path;
+	gchar      *dir_name;
+	tree_view_data_t *mydata;
+
+	tree_model = gtk_tree_view_get_model (tree_view);
+	gtk_tree_model_get_iter (tree_model, &iter, path);
+	gtk_tree_model_get (tree_model, &iter,
+			    PATH_COLUMN, &item_path,
+			    -1);
+	dir_name = g_path_get_dirname  (item_path);
+	g_printf("Item activated, path:%s, dir:%s\n", item_path, dir_name);
+	mydata = user_data;
+	if(user_data && mydata) {
+		compose_imgfile_list(GTK_LIST_STORE(tree_model),
+				     dir_name, mydata->folder_pixbuf, 
+				     mydata->img_pixbuf, item_path);
+		mydata->img_widget = get_image_from_model (GTK_LIST_STORE(tree_model));
+	}
+	g_free (dir_name);
+	g_free (item_path);
+	// g_free (mydata);
+}
+
+GtkWidget* create_view_with_model(GtkListStore *model,
+				  GdkPixbuf *folder_pixbuf,
+				  GdkPixbuf *img_pixbuf,
+				  GtkWidget *image_widget)
+{
 
 	GtkCellRenderer     *renderer;
 	GtkTreeModel        *tree_model;
 	GtkWidget           *view;
+	tree_view_data_t    *mydata;
 
-	if(!model) {
+	if(!model || !folder_pixbuf || !img_pixbuf) {
 		return NULL;
 	}
-	
+
 	tree_model = GTK_TREE_MODEL(model);
 
 	view = gtk_tree_view_new ();
+
+	mydata = (tree_view_data_t*)g_malloc(sizeof(tree_view_data_t));
+	mydata->folder_pixbuf = folder_pixbuf;
+	mydata->img_pixbuf = img_pixbuf;
+	mydata->img_widget = image_widget;
 
 	/* --- Column #1: ICON TO SHOW DIR, IMG--- */	
 	renderer = gtk_cell_renderer_pixbuf_new ();
@@ -63,11 +115,14 @@ GtkWidget* create_view_with_model(GtkListStore *model) {
 	                                             NULL);
 	
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), tree_model);
+
+	g_signal_connect (view, "row-activated",
+			  G_CALLBACK (tree_view_item_activated),
+			  mydata);
 	
 	/* The tree view has acquired its own reference to the
 	 *  model, so we can drop ours. That way the model will
 	 *  be freed automatically when the tree view is destroyed */
-	
 	g_object_unref (model);
 	
 	return view;

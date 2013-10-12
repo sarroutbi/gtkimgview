@@ -29,4 +29,7 @@
 **/
 #include <gtk/gtk.h>
 
-GtkWidget* create_view_with_model(GtkListStore *model);
+GtkWidget* create_view_with_model(GtkListStore *model, 
+                                  GdkPixbuf *folder_pixbuf,
+                                  GdkPixbuf *img_pixbuf,
+                                  GtkWidget *img_widget);

@@ -69,60 +69,12 @@ tree_view_item_activated (GtkTreeView       *tree_view,
 				     new_path, mydata->folder_pixbuf, 
 				     mydata->img_pixbuf, item_path);
 		if(!is_dir && mydata->img_widget) {
-			//gtk_image_set_from_file(((GtkImage*)mydata->img_widget), item_path);
 			set_image_from_file(mydata->img_widget, item_path);
-		}
-		else if(!is_dir && mydata->img_widget) {
-			refresh_view_with_model(GTK_LIST_STORE(tree_model),
-						NULL);
 		}
 	}
 	g_free (dir_name);
 	g_free (item_path);
 	// g_free (mydata);
-}
-
-gboolean refresh_view_with_model(GtkListStore *model,
-				 GtkWidget* tree_view)
-{
-	GtkTreeModel    *tree_model;
-	GtkCellRenderer *renderer;
-
-	if(!model || !tree_view)
-		return FALSE;
-
-	tree_model = GTK_TREE_MODEL(model);
-
-	/* --- Column #1: ICON TO SHOW DIR, IMG--- */	
-	renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),
-	                                             -1,
-	                                             "Icon",
-	                                             renderer,
-	                                             "pixbuf", ICON_COLUMN,
-	                                             NULL);
-	
-	/* --- Column #2: PATH --- */	
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),
-	                                             -1,      
-	                                             "Path",  
-	                                             renderer,
-	                                             "text", FILENAME_COLUMN,
-	                                             NULL);
-
-	/* --- Column #3: SIZE --- */	
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),
-	                                             -1,      
-	                                             "SIZE",
-	                                             renderer,
-	                                             "text", STR_SIZE_COLUMN,
-	                                             NULL);
-	
-	gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), tree_model);
-
-	return TRUE;
 }
 
 GtkWidget* create_view_with_model(GtkListStore *model,

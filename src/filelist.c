@@ -54,9 +54,6 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 		return;
 	}
 
-	g_printf("Updating model, path:%s, selected_file:%s\n",
-		 dir_path, file_selected ? file_selected : "NONE");
-
 	if(file_selected) {
 		img_selected = TRUE;
 	}

@@ -29,5 +29,9 @@
 **/
 #include <gtk/gtk.h>
 
+#define FIX_IMG_HEIGHT 640
+#define FIX_IMG_WIDTH  480
+
 /* Get the GtkImage with the model */
 GtkWidget* get_image_from_model (GtkListStore *model);
+gboolean set_image_from_file (GtkWidget* image, gchar* path);

@@ -84,7 +84,6 @@ up_button_clicked (GtkButton    *button,
 
 	// Obtain parent path
 	parent_path = g_path_get_dirname (absolute_path);
-	g_printf("Path:%s, Parent:%s\n", absolute_path, parent_path);
 	g_free (absolute_path);
 
 	// Compose the model, again, with parent directory
@@ -161,7 +160,7 @@ gint main (gint argc, gchar **argv)
 	// - Pop up
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title (GTK_WINDOW (window), "A very simple image viewer");
-	gtk_window_set_default_size (GTK_WINDOW (window), 640, 480);
+	gtk_window_set_default_size (GTK_WINDOW (window), 800, 600);
 
 	// Initialize the boxes, 
 	// 0 px space for horizontal children

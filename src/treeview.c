@@ -55,8 +55,6 @@ tree_view_item_activated (GtkTreeView       *tree_view,
 			    PATH_COLUMN, &item_path,
 			    -1);
 	dir_name = g_path_get_dirname  (item_path);
-	g_printf("Item activated, path:%s, is_dir?:%s, dir:%s\n", 
-		 item_path, is_dir ? "TRUE" : "FALSE", dir_name);
 	mydata = user_data;
 	if(user_data && mydata) {
 		// Update the model with file or subfolder
@@ -71,13 +69,13 @@ tree_view_item_activated (GtkTreeView       *tree_view,
 				     new_path, mydata->folder_pixbuf, 
 				     mydata->img_pixbuf, item_path);
 		if(!is_dir && mydata->img_widget) {
-			gtk_image_set_from_file(((GtkImage*)mydata->img_widget), item_path);
+			//gtk_image_set_from_file(((GtkImage*)mydata->img_widget), item_path);
+			set_image_from_file(mydata->img_widget, item_path);
 		}
 		else if(!is_dir && mydata->img_widget) {
 			refresh_view_with_model(GTK_LIST_STORE(tree_model),
 						NULL);
 		}
-
 	}
 	g_free (dir_name);
 	g_free (item_path);

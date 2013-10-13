@@ -30,6 +30,28 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include "model.h"
+#include "imgview.h"
+
+/* Set the image from file by using pixbuf */
+gboolean set_image_from_file (GtkWidget* image, gchar* path) 
+{
+	GdkPixbuf *pixbuf;
+	GError *error = NULL;
+	gboolean ok = TRUE;
+	if(!image || !path) {
+		ok = FALSE;
+	}
+	else if( !(pixbuf = gdk_pixbuf_new_from_file_at_size 
+			  (path, FIX_IMG_WIDTH, FIX_IMG_HEIGHT, &error))) {
+		g_error_free (error);
+		ok = FALSE;
+	}
+	else {
+		gtk_image_set_from_pixbuf ((GtkImage*) image, pixbuf);
+		g_object_unref (pixbuf);
+	}
+	return ok;
+}
 
 /* Get the GtkWidget as Image Widget with the model */
 GtkWidget* get_image_from_model (GtkListStore *model)
@@ -40,7 +62,9 @@ GtkWidget* get_image_from_model (GtkListStore *model)
 	gint row_count = 0;
         gchar *path;
         gchar *file;
-	GtkWidget* image_widget;
+	GtkWidget *image_widget;
+	GdkPixbuf *pixbuf;
+	GError *error = NULL;
 
 	list_store = GTK_TREE_MODEL (model);
 
@@ -64,8 +88,16 @@ GtkWidget* get_image_from_model (GtkListStore *model)
 		}
 		row_count++;
 	}
-	g_printf("CREATING IMAGE WITH PATH:%s\n", path);
-	image_widget = gtk_image_new_from_file(path);
+
+	pixbuf = gdk_pixbuf_new_from_file_at_size (path, FIX_IMG_WIDTH, FIX_IMG_HEIGHT, &error);
+	if (!pixbuf)
+	{
+		g_print ("Error: %s\n", error->message);
+		g_error_free (error);
+	}
+
+	image_widget = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref (pixbuf);
 	g_free (path);
 	return image_widget;
 }

@@ -150,7 +150,8 @@ gint main (gint argc, gchar **argv)
 				    G_TYPE_STRING,
 				    GDK_TYPE_PIXBUF,
 				    G_TYPE_BOOLEAN,
-				    G_TYPE_BOOLEAN);
+				    G_TYPE_BOOLEAN,
+				    G_TYPE_STRING);
 	
 	// Compose the model with an image list
 	compose_imgfile_list(model, now_path, folder_pixbuf, img_pixbuf, NULL);

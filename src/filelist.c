@@ -62,18 +62,25 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 	}
 	name = g_dir_read_name (dir);
 	while (name) {
-		gchar*   path, *display_name;
+		gchar    *path, *display_name;
 		gboolean is_file = FALSE;
 		gboolean is_img_file = FALSE;
 		gboolean is_dir = FALSE;
 		gboolean is_selected = FALSE;
-		GRegex*  img_regex = NULL;
-		GError*  regex_error = NULL;
-		GMatchInfo* match_info;
+		GRegex   *img_regex = NULL;
+		GError   *error = NULL;
+		GMatchInfo *match_info;
+		gchar      *format_size;
+                gchar      *contents;
+                gsize      length;
 
 		// Create a regex.
 		img_regex = g_regex_new(IMG_REGEXP_EXPRESSION, G_REGEX_OPTIMIZE,
-					0, &regex_error);
+					0, &error);
+		if(error) {
+			g_error_free (error);
+			error = NULL;
+		}
 
 		/* We ignore hidden files that start with '.' */
 		if (name[0] == '.') {
@@ -87,9 +94,13 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 
 		//Search the regex;
 		if(TRUE == g_regex_match_full(img_regex, path, -1, 0, 0,
-					      &match_info, &regex_error) && is_file)
+					      &match_info, &error) && is_file)
 		{
 			is_img_file = TRUE;
+		}
+		if (error) {
+			g_error_free (error);
+			error = NULL;
 		}
 
 		is_dir = g_file_test (path, G_FILE_TEST_IS_DIR);
@@ -107,6 +118,15 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 				is_selected  = TRUE;
 				img_selected = TRUE;
 			}
+	
+			// Get The file information
+			g_file_get_contents (path, &contents, &length, &error);
+			g_free(contents);
+			if(error) {
+				g_error_free (error);
+				error = NULL;
+			} 
+			format_size = g_format_size(length);
 
 			display_name = g_filename_to_utf8 (name, -1, NULL, NULL, NULL);
 
@@ -118,6 +138,11 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 					    IS_DIR_COLUMN, is_dir,
     					    IS_SELECTED_COLUMN, is_selected,
 					    -1);
+			if(!is_dir) {
+				gtk_list_store_set
+					(model, &iter, STR_SIZE_COLUMN, format_size, -1);
+			}
+
 			added++;
 			g_free (display_name);
 		}

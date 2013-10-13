@@ -110,6 +110,15 @@ gboolean refresh_view_with_model(GtkListStore *model,
 	                                             renderer,
 	                                             "text", FILENAME_COLUMN,
 	                                             NULL);
+
+	/* --- Column #3: SIZE --- */	
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (tree_view),
+	                                             -1,      
+	                                             "SIZE",
+	                                             renderer,
+	                                             "text", STR_SIZE_COLUMN,
+	                                             NULL);
 	
 	gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), tree_model);
 
@@ -139,7 +148,7 @@ GtkWidget* create_view_with_model(GtkListStore *model,
 	mydata->img_pixbuf = img_pixbuf;
 	mydata->img_widget = image_widget;
 
-	/* --- Column #1: ICON TO SHOW DIR, IMG--- */	
+	/* ICON */	
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                             -1,
@@ -148,13 +157,22 @@ GtkWidget* create_view_with_model(GtkListStore *model,
 	                                             "pixbuf", ICON_COLUMN,
 	                                             NULL);
 	
-	/* --- Column #2: PATH --- */	
+	/* PATH */	
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                             -1,      
 	                                             "Path",  
 	                                             renderer,
 	                                             "text", FILENAME_COLUMN,
+	                                             NULL);
+
+	/* SIZE */	
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+	                                             -1,      
+	                                             "SIZE",
+	                                             renderer,
+	                                             "text", STR_SIZE_COLUMN,
 	                                             NULL);
 	
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), tree_model);

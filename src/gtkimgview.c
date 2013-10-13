@@ -128,7 +128,7 @@ gint main (gint argc, gchar **argv)
 	GtkWidget *image;
 
 	// Box for packaging
-	GtkWidget    *vbox, *hbox, *topbar;
+	GtkWidget    *vbox, *topbar;
 
 	// Up button
 	GtkWidget    *up_button;
@@ -173,9 +173,7 @@ gint main (gint argc, gchar **argv)
 	gtk_window_set_default_size (GTK_WINDOW (window), 800, 600);
 
 	// Initialize the boxes, 
-	// 0 px space for horizontal children
-	// 12 px space for horizontal children
-	hbox   = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	// 0 px space for horizontal and vertical children
 	topbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	vbox   = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
@@ -211,10 +209,10 @@ gint main (gint argc, gchar **argv)
 	gtk_container_add (GTK_CONTAINER (subwindow), tree_view);
 	gtk_widget_show (tree_view);
 
-	gtk_box_pack_start (GTK_BOX (hbox), subwindow, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), subwindow, TRUE, TRUE, 0);
 	gtk_widget_show (subwindow);
 
-	gtk_box_pack_start (GTK_BOX (hbox), image, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox), image, TRUE, TRUE, 0);
 	gtk_widget_show (image);
 	
 	// Set the connect
@@ -222,8 +220,6 @@ gint main (gint argc, gchar **argv)
 			  G_CALLBACK (on_delete_event), NULL);
 	
 	// Show all
-	gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 0);
-	gtk_widget_show (hbox);
 
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 	gtk_widget_show (vbox);

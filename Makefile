@@ -12,4 +12,4 @@ $(TARGET): $(TARGET_FILES)
 								$(CC) $(CCFLAGS) $(INC_FLAGS) $(TARGET_FILES) $(LIB_FLAGS) -o $@
 
 clean:
-								rm $(TARGET) *~
+								@rm -rfv $(TARGET) *~ $(SRC_DIR)/*~

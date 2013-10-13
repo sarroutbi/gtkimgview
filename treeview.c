@@ -32,6 +32,7 @@
 #include "model.h"
 #include "filelist.h"
 #include "imgview.h"
+#include "treeview.h"
 
 typedef struct
 {
@@ -50,22 +51,27 @@ tree_view_item_activated (GtkTreeView       *tree_view,
 	GtkTreeModel *tree_model;
 	GtkTreeIter iter;
 	gchar      *item_path;
+	gboolean   is_dir;
 	gchar      *dir_name;
 	tree_view_data_t *mydata;
 
 	tree_model = gtk_tree_view_get_model (tree_view);
 	gtk_tree_model_get_iter (tree_model, &iter, path);
 	gtk_tree_model_get (tree_model, &iter,
+			    IS_DIR_COLUMN, &is_dir,
 			    PATH_COLUMN, &item_path,
 			    -1);
 	dir_name = g_path_get_dirname  (item_path);
-	g_printf("Item activated, path:%s, dir:%s\n", item_path, dir_name);
+	g_printf("Item activated, path:%s, is_dir?:%s, dir:%s\n", 
+		 item_path, is_dir ? "TRUE" : "FALSE", dir_name);
 	mydata = user_data;
 	if(user_data && mydata) {
 		compose_imgfile_list(GTK_LIST_STORE(tree_model),
 				     dir_name, mydata->folder_pixbuf, 
 				     mydata->img_pixbuf, item_path);
-		mydata->img_widget = get_image_from_model (GTK_LIST_STORE(tree_model));
+		if(!is_dir && mydata->img_widget) {
+			gtk_image_set_from_file(((GtkImage*)mydata->img_widget), item_path);
+		}
 	}
 	g_free (dir_name);
 	g_free (item_path);

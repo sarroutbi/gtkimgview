@@ -45,6 +45,7 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 	const gchar *name;
 	GtkTreeIter  iter;
 	gboolean     img_selected;
+	gint         added = 0;
 
 	gtk_list_store_clear (model);
 	dir = g_dir_open (dir_path, 0, NULL);
@@ -120,10 +121,21 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 					    IS_DIR_COLUMN, is_dir,
     					    IS_SELECTED_COLUMN, is_selected,
 					    -1);
+			added++;
 			g_free (display_name);
 		}
 		g_free (path);
 		name = g_dir_read_name (dir);
+	}
+	if(!added) {
+		gtk_list_store_append (model, &iter);
+		gtk_list_store_set (model, &iter,
+				    PATH_COLUMN, "",
+				    FILENAME_COLUMN, "NO IMAGES FOUND",
+				    ICON_COLUMN, NULL,
+				    IS_DIR_COLUMN, FALSE,
+				    IS_SELECTED_COLUMN, FALSE,
+				    -1);
 	}
 
 	g_dir_close (dir);

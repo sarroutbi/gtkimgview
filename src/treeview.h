@@ -33,3 +33,6 @@ GtkWidget* create_view_with_model(GtkListStore *model,
                                   GdkPixbuf *folder_pixbuf,
                                   GdkPixbuf *img_pixbuf,
                                   GtkWidget *img_widget);
+
+gboolean refresh_view_with_model(GtkListStore *model,
+                                 GtkWidget* tree_view);

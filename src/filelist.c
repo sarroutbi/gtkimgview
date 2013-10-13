@@ -30,6 +30,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <glib/gstdio.h>
 #include <string.h>
 #include "model.h"
 #include "filelist.h"
@@ -47,8 +48,8 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 	gboolean     img_selected;
 	gint         added = 0;
 
-	g_printf("Updating model with path:%s, file_selected:%s\n",
-		 dir_path, file_selected ? file_selected : NULL);
+	/* g_printf("Updating model with path:%s, file_selected:%s\n", */
+	/* 	 dir_path, file_selected ? file_selected : NULL); */
 
 	gtk_list_store_clear (model);
 	dir = g_dir_open (dir_path, 0, NULL);
@@ -76,6 +77,7 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 		gchar      *format_size;
                 gchar      *contents;
                 gsize      length;
+		GStatBuf   pstat;
 
 		// Create a regex.
 		img_regex = g_regex_new(IMG_REGEXP_EXPRESSION, G_REGEX_OPTIMIZE,
@@ -129,11 +131,13 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 				g_error_free (error);
 				error = NULL;
 			} 
+			// Set The Size in format string (i.e.:1024 -> 1 kB)
 			format_size = g_format_size(length);
 
+			// Set path display format
 			display_name = g_filename_to_utf8 (name, -1, NULL, NULL, NULL);
-
 			gtk_list_store_append (model, &iter);
+
 			gtk_list_store_set (model, &iter,
 					    PATH_COLUMN, path,
 					    FILENAME_COLUMN, display_name,
@@ -141,11 +145,20 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 					    IS_DIR_COLUMN, is_dir,
     					    IS_SELECTED_COLUMN, is_selected,
 					    -1);
+
+			// Show size and modification time only for image files
 			if(!is_dir) {
 				gtk_list_store_set
 					(model, &iter, STR_SIZE_COLUMN, format_size, -1);
+				if(g_stat(path, &pstat) == 0) {
+					time_t tdate = ((struct stat)pstat).st_mtime;
+					gchar* str_date =
+						g_strndup(ctime(&tdate), strlen(ctime(&tdate))-1);
+					gtk_list_store_set
+						(model, &iter, STR_DATE_COLUMN, str_date, -1);
+					g_free(str_date);
+				}
 			}
-
 			added++;
 			g_free (display_name);
 		}

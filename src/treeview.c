@@ -108,7 +108,6 @@ GtkWidget* create_view_with_model(GtkListStore *model,
 	                                             renderer,
 	                                             "pixbuf", ICON_COLUMN,
 	                                             NULL);
-	
 	/* PATH */	
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
@@ -117,14 +116,21 @@ GtkWidget* create_view_with_model(GtkListStore *model,
 	                                             renderer,
 	                                             "text", FILENAME_COLUMN,
 	                                             NULL);
-
-	/* SIZE */	
+	/* SIZE */
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                             -1,      
-	                                             "SIZE",
+	                                             "Size",
 	                                             renderer,
 	                                             "text", STR_SIZE_COLUMN,
+	                                             NULL);
+	/* DATE */	
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+	                                             -1,      
+	                                             "Last Modified",
+	                                             renderer,
+	                                             "text", STR_DATE_COLUMN,
 	                                             NULL);
 	
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), tree_model);

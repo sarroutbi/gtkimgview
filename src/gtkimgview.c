@@ -159,6 +159,7 @@ gint main (gint argc, gchar **argv)
 				    GDK_TYPE_PIXBUF,
 				    G_TYPE_BOOLEAN,
 				    G_TYPE_BOOLEAN,
+				    G_TYPE_STRING,
 				    G_TYPE_STRING);
 	
 	// Compose the model with an image list

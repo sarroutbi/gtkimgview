@@ -29,7 +29,7 @@
 **/
 
 #include <gtk/gtk.h>
-#include <glib/gprintf.h>
+#include <glib.h>
 #include <string.h>
 #include "model.h"
 #include "filelist.h"
@@ -83,7 +83,15 @@ up_button_clicked (GtkButton    *button,
 	}
 
 	// Obtain parent path
-	parent_path = g_path_get_dirname (absolute_path);
+	if(!strcmp(absolute_path, ".")) {
+		parent_path = g_strdup("..");
+	}
+	else if(g_strstr_len(absolute_path, strlen(absolute_path), "..")) {
+		parent_path = g_strconcat (absolute_path, "/..", NULL);
+	}
+	else {
+		parent_path = g_path_get_dirname (absolute_path);
+	}
 	g_free (absolute_path);
 
 	// Compose the model, again, with parent directory

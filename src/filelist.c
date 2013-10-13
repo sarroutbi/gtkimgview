@@ -47,6 +47,9 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 	gboolean     img_selected;
 	gint         added = 0;
 
+	g_printf("Updating model with path:%s, file_selected:%s\n",
+		 dir_path, file_selected ? file_selected : NULL);
+
 	gtk_list_store_clear (model);
 	dir = g_dir_open (dir_path, 0, NULL);
 

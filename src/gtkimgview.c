@@ -29,11 +29,19 @@
 **/
 
 #include <gtk/gtk.h>
+#include <glib/gprintf.h>
 #include <string.h>
 #include "model.h"
 #include "filelist.h"
 #include "treeview.h"
 #include "imgview.h"
+
+typedef struct 
+{
+	GtkListStore *model;
+	GdkPixbuf    *folder_pixbuf;
+	GdkPixbuf    *img_pixbuf;
+} button_data_t;
 
 static gboolean 
 on_delete_event (GtkWidget *widget, GdkEvent*event, gpointer user_data)
@@ -42,6 +50,51 @@ on_delete_event (GtkWidget *widget, GdkEvent*event, gpointer user_data)
 	return GDK_EVENT_PROPAGATE;
 }
 
+static void
+up_button_clicked (GtkButton    *button,
+		   gpointer userdata)
+{
+	button_data_t* bdata = (button_data_t*) userdata;
+	gboolean valid;
+	gboolean is_dir;
+	GtkTreeIter iter;
+	GtkTreeModel *tree_model;
+        gchar *path;
+	gchar *absolute_path;
+        gchar *parent_path;
+
+	if(!userdata || !bdata || !bdata->model) {
+		return;
+	}
+
+	tree_model = GTK_TREE_MODEL (bdata->model);
+
+	// Get, from the model, the path now, and obtain parent's one
+	for (valid = gtk_tree_model_get_iter_first (tree_model, &iter);
+	     valid; valid = gtk_tree_model_iter_next (tree_model, &iter))
+	{
+		gtk_tree_model_get (tree_model, &iter,
+				    PATH_COLUMN, &path,
+				    IS_DIR_COLUMN, &is_dir,
+				    -1);
+		absolute_path = g_path_get_dirname (path);
+		g_free(path);
+		break;
+	}
+
+	// Obtain parent path
+	parent_path = g_path_get_dirname (absolute_path);
+	g_printf("Path:%s, Parent:%s\n", absolute_path, parent_path);
+	g_free (absolute_path);
+
+	// Compose the model, again, with parent directory
+	// selection set to NULL, for first image on parent path
+	// to be selected
+	compose_imgfile_list(bdata->model, parent_path,
+			     bdata->folder_pixbuf, bdata->img_pixbuf,
+			     NULL);
+	g_free (parent_path);
+}
 
 gint main (gint argc, gchar **argv)
 {
@@ -68,7 +121,10 @@ gint main (gint argc, gchar **argv)
 	GtkWidget *image;
 
 	// Box for packaging
-	GtkWidget    *vbox, *hbox;
+	GtkWidget    *vbox, *hbox, *topbar;
+
+	// Up button
+	GtkWidget    *up_button;
 
 	// Initialize GTK
 	gtk_init(&argc, &argv);
@@ -110,8 +166,26 @@ gint main (gint argc, gchar **argv)
 	// Initialize the boxes, 
 	// 0 px space for horizontal children
 	// 12 px space for horizontal children
-	hbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	hbox   = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	topbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	vbox   = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+	// Up Button
+	up_button = gtk_button_new_from_stock (GTK_STOCK_GO_UP);
+	button_data_t bdata;
+	bdata.model = model;
+	bdata.folder_pixbuf = folder_pixbuf;
+	bdata.img_pixbuf = img_pixbuf;
+
+	g_signal_connect (up_button, "clicked",
+			  G_CALLBACK (up_button_clicked),
+			  (gpointer)&bdata);
+
+	gtk_box_pack_start (GTK_BOX (topbar), up_button, FALSE, FALSE, 0);
+	gtk_widget_show (up_button);
+
+	gtk_box_pack_start (GTK_BOX (vbox), topbar, FALSE, TRUE, 0);
+	gtk_widget_show (topbar);
 
 	// The Image View
 	image = get_image_from_model (model);

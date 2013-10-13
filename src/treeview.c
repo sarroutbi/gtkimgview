@@ -34,13 +34,6 @@
 #include "imgview.h"
 #include "treeview.h"
 
-typedef struct
-{
-	GdkPixbuf *folder_pixbuf;
-	GdkPixbuf *img_pixbuf;
-	GtkWidget *img_widget;
-} tree_view_data_t ;
-
 /* Tree View */
 static void
 tree_view_item_activated (GtkTreeView       *tree_view,

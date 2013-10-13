@@ -29,6 +29,13 @@
 **/
 #include <gtk/gtk.h>
 
+typedef struct
+{
+	GdkPixbuf *folder_pixbuf;
+	GdkPixbuf *img_pixbuf;
+	GtkWidget *img_widget;
+} tree_view_data_t ;
+
 GtkWidget* create_view_with_model(GtkListStore *model, 
                                   GdkPixbuf *folder_pixbuf,
                                   GdkPixbuf *img_pixbuf,

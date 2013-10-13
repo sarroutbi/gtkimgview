@@ -130,7 +130,7 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 	if(!added) {
 		gtk_list_store_append (model, &iter);
 		gtk_list_store_set (model, &iter,
-				    PATH_COLUMN, "",
+				    PATH_COLUMN, dir_path,
 				    FILENAME_COLUMN, "NO IMAGES FOUND",
 				    ICON_COLUMN, NULL,
 				    IS_DIR_COLUMN, FALSE,

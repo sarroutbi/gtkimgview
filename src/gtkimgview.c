@@ -227,5 +227,11 @@ gint main (gint argc, gchar **argv)
 	
 	// Initialize event loop
 	gtk_main ();
+
+	if (img_pixbuf)
+		g_object_unref (img_pixbuf);
+	if (folder_pixbuf)
+		g_object_unref (folder_pixbuf);
+
 	return 0;
 }

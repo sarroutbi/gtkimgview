@@ -83,6 +83,7 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 		img_regex = g_regex_new(IMG_REGEXP_EXPRESSION, G_REGEX_OPTIMIZE,
 					0, &error);
 		if(error) {
+			g_regex_unref(img_regex);
 			g_error_free (error);
 			error = NULL;
 		}
@@ -90,6 +91,7 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 		/* We ignore hidden files that start with '.' */
 		if (name[0] == '.') {
 			name = g_dir_read_name (dir);
+			g_regex_unref(img_regex);
 			continue;
 		}
 
@@ -104,6 +106,8 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 			is_img_file = TRUE;
 		}
 		if (error) {
+			g_match_info_free (match_info);
+			g_regex_unref(img_regex);
 			g_error_free (error);
 			error = NULL;
 		}
@@ -161,9 +165,13 @@ void compose_imgfile_list(GtkListStore *model, gchar *dir_path,
 			}
 			added++;
 			g_free (display_name);
+			g_free (format_size);
 		}
 		g_free (path);
+		g_match_info_free (match_info);
+		g_regex_unref(img_regex);
 		name = g_dir_read_name (dir);
+
 	}
 	if(!added) {
 		gtk_list_store_append (model, &iter);
